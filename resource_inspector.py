@@ -1,3 +1,4 @@
+import boto3
 
 def core_calculation(a, b):
     """A simple function to demonstrate testing."""
