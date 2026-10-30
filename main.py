@@ -1,4 +1,4 @@
-from inspectors import check_s3_bucket_public_status, ACTIVE_AUDIT_LOG
+from src.inspectors import ACTIVE_AUDIT_LOG
 
 def run_audit():
 
