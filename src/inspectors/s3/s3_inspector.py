@@ -4,15 +4,22 @@ from botocore.exceptions import ClientError
 #TODO:Create an s3 inspector that can track s3 compliance.
 
 def check_s3_bucket_public_status(bucket_name):
-    return None
 
-s3 = boto3.client('s3')
-buckets = s3.list_buckets().get('Buckets', [])
+    s3 = boto3.client('s3')
 
-for bucket in buckets:
+    print(f"Analyzing bucket: {bucket_name}")
 
-    name = bucket['Name']
-    #TODO: Check Public Access
-    #TODO: Check Encryption
-    #TODO: Server Access Logging
+    # TODO: Check Public Access
+    # TODO: Check Encryption
+    # TODO: Server Access Logging
+    # Check Bucket Policy
+    try:
+        policy_status = s3.get_bucket_policy_status(Bucket=bucket_name)
+        is_policy_public = policy_status.get('PolicyStatus', {}).get('IsPublic', False)
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchBucketPolicy':
+            is_policy_public = False
+        else:
+            print(f"Error checking policy status: {e}")
+            is_policy_public = None
 
