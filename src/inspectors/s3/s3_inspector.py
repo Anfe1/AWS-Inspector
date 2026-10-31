@@ -14,9 +14,11 @@ def check_s3_bucket_public_status(bucket_name):
 
     # Check Bucket Policy
     try:
+        # Retrieve the bucket policy and checks if the policy is public
         policy_status = s3.get_bucket_policy_status(Bucket=bucket_name)
         is_policy_public = policy_status.get('PolicyStatus', {}).get('IsPublic', False)
 
+    # Error handling for policy
     except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchBucketPolicy':
             is_policy_public = False
@@ -24,10 +26,13 @@ def check_s3_bucket_public_status(bucket_name):
             print(f"Error checking policy status: {e}")
             is_policy_public = None
 
-    # TODO: Check Public Access
+    # Check Bucket ACLs
     is_acl_public = False
+
     try:
+        # Retrieves the bucket ACL, checks grants and grantee groups URI to determine if the ACL is public.
         acl = s3.get_bucket_acl(Bucket=bucket_name)
+
         for grant in acl.get('Grants', []):
             grantee = grant.get('Grantee', {})
 
@@ -46,6 +51,7 @@ def check_s3_bucket_public_status(bucket_name):
     bpa_blocks_policy = False
 
     try:
+        # Retrieves the bpa configuration for the s3, determines if the public policies are being blocked or restricted
         bpa =  s3.get_public_access_block(Bucket=bucket_name)
         config = bpa.get('PublicAccessBlockConfiguration', {})
 
