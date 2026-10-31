@@ -40,3 +40,21 @@ def check_s3_bucket_public_status(bucket_name):
 
     except ClientError as e:
         print(f"Error checking ACL: {e}")
+
+    # Check Block Public Access
+    bpa_blocks_acls = False
+    bpa_blocks_policy = False
+
+    try:
+        bpa =  s3.get_public_access_block(Bucket=bucket_name)
+        config = bpa.get('PublicAccessBlockConfiguration', {})
+
+        bpa_blocks_acls = config.get('IgnorePublicAcls', False) or config.get('BlockPublicAcls', False)
+        bpa_blocks_policy = config.get('RestrictPublicBuckets', False) or config.get('BlockPublicPolicy', False)
+
+    except ClientError as e:
+
+        if e.response['Error']['Code'] == 'NoSuchPublicAccessBlock':
+            pass
+        else:
+            print(f'Error checking BPA: {e}')
