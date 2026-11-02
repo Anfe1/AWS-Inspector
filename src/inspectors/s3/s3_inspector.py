@@ -9,7 +9,7 @@ def check_s3_bucket_public_status(bucket_name):
 
     print(f"Analyzing bucket: {bucket_name}")
 
-    # TODO: Check Encryption
+
     # TODO: Server Access Logging
 
     # Check Bucket Policy
@@ -64,3 +64,25 @@ def check_s3_bucket_public_status(bucket_name):
             pass
         else:
             print(f'Error checking BPA: {e}')
+
+
+    # Check Encryption configuration
+    try:
+
+        encryption = s3.get_bucket_encryption(Bucket=bucket_name)
+        rules = encryption['ServerSideEncryptionConfiguration']['Rules']
+
+        for rule in rules:
+            algorithm = rule['ApplyServerSideEncryptionByDefault']['SSEAlgorithm']
+            print(f"Bucket default encryption is enabled using: {algorithm}")
+
+            if 'KMSMasterKeyId' in rule['ApplyServerSideEncryptionByDefault']:
+                kms_key = rule['ApplyServerSideEncryptionByDefault']['KMSMasterKeyId']
+                print(f"KMS Key ARN: {kms_key}")
+
+    except ClientError as e:
+
+        if e.response['Error']['Code'] == 'ServerSideEncryptionConfigurationNotFoundError':
+            print("No explicit default encryption configuration found. S3 falls back to automatic SSE-S3.")
+        else:
+            print(f"An error occurred: {e}")
