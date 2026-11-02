@@ -69,6 +69,8 @@ def check_s3_bucket_public_status(bucket_name):
     # Check Encryption configuration
     try:
 
+        # Retrieves the bucket encryption configuration and checks if any of the encryption settings are enabled.
+
         encryption = s3.get_bucket_encryption(Bucket=bucket_name)
         rules = encryption['ServerSideEncryptionConfiguration']['Rules']
 
