@@ -89,6 +89,7 @@ def check_s3_bucket_public_status(bucket_name):
     # Check Bucket Logging
     try:
 
+        # Check if loggin is enabled and extracts loggin info
         logging_status =  s3.get_bucket_logging(Bucket=bucket_name)
 
         if 'LoggingEnabled' in logging_status:
