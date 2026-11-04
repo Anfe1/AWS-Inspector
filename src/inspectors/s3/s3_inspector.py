@@ -9,9 +9,6 @@ def check_s3_bucket_public_status(bucket_name):
 
     print(f"Analyzing bucket: {bucket_name}")
 
-
-    # TODO: Server Access Logging
-
     # Check Bucket Policy
     try:
         # Retrieve the bucket policy and checks if the policy is public
@@ -88,3 +85,17 @@ def check_s3_bucket_public_status(bucket_name):
             print("No explicit default encryption configuration found. S3 falls back to automatic SSE-S3.")
         else:
             print(f"An error occurred: {e}")
+
+    # Check Bucket Logging
+    try:
+
+        logging_status =  s3.get_bucket_logging(Bucket=bucket_name)
+
+        if 'LoggingEnabled' in logging_status:
+            logging_info = logging_status['LoggingEnabled']
+            target_bucket = logging_status['TargetBucket']
+            target_prefix = logging_status['TargetPrefix', '']
+
+    except ClientError as e:
+
+        print(f"[ERROR]    {bucket_name}: Could not check status ({str(e)})")
