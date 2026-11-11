@@ -13,9 +13,26 @@ def run_audit():
 
     try:
         # Initialize s3 client
+        print("Initiating S3 inspection")
         s3_client = boto3.client("s3")
         response = s3_client.list_buckets()
         buckets = response.get('Buckets', [])
+
+        if not buckets:
+            print("No buckets found.")
+            return
+
+        print(f"{'Bucket Name':<45} | {'Public Block':<12} | {'Encryption':<12} | {'Versioning':<12}")
+        print("-" * 90)
+
+        #TODO: Call in inspector functions
+        for bucket in buckets:
+
+            bucket_name = bucket['Name']
+
+            results = check_s3_bucket_public_status(bucket_name)
+
+
 
     except ClientError as e:
         print(f"Error listing buckets: {e}")
