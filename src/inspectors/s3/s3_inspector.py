@@ -12,6 +12,7 @@ def check_s3_bucket_public_status(bucket_name):
     print(f"Analyzing bucket: {bucket_name}")
 
     # Check Bucket Policy
+    print("|---------Initiating Bucket Policy Check---------|")
     try:
         # Retrieve the bucket policy and checks if the policy is public
         policy_status = s3.get_bucket_policy_status(Bucket=bucket_name)
@@ -29,6 +30,7 @@ def check_s3_bucket_public_status(bucket_name):
     is_acl_public = False
 
     try:
+        print("|---------Initiating Bucket ACL Check---------|")
         # Retrieves the bucket ACL, checks grants and grantee groups URI to determine if the ACL is public.
         acl = s3.get_bucket_acl(Bucket=bucket_name)
 
@@ -50,6 +52,7 @@ def check_s3_bucket_public_status(bucket_name):
     bpa_blocks_policy = False
 
     try:
+        print("|---------Initiating BPA configuration Check---------|")
         # Retrieves the bpa configuration for the s3, determines if the public policies are being blocked or restricted
         bpa =  s3.get_public_access_block(Bucket=bucket_name)
         config = bpa.get('PublicAccessBlockConfiguration', {})
@@ -67,7 +70,7 @@ def check_s3_bucket_public_status(bucket_name):
 
     # Check Encryption configuration
     try:
-
+        print("|---------Initiating Bucket Encryption Check---------|")
         # Retrieves the bucket encryption configuration and checks if any of the encryption settings are enabled.
 
         encryption = s3.get_bucket_encryption(Bucket=bucket_name)
@@ -90,8 +93,8 @@ def check_s3_bucket_public_status(bucket_name):
 
     # Check Bucket Logging
     try:
-
-        # Check if loggin is enabled and extracts loggin info
+        print("|---------Initiating Bucket Logging Check---------|")
+        # Check if logging is enabled and extracts loggin info
         logging_status =  s3.get_bucket_logging(Bucket=bucket_name)
 
         if 'LoggingEnabled' in logging_status:
