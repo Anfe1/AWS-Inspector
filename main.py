@@ -9,7 +9,8 @@ def run_audit():
     print("Initiating AWS resource inspection")
 
     #TODO: Run the application logic that audits the AWS services
-
+    #TODO: Need to reformat for better calling of inspector functions, at the moment the app only calls in s3 inspections
+    # it might be best to reformat to include a set of inspector functions to keep the main file cleaner.
 
     try:
         # Initialize s3 client
