@@ -30,7 +30,7 @@ def run_audit():
 
             bucket_name = bucket['Name']
 
-            results = check_s3_bucket_public_status(bucket_name)
+            s3_results = check_s3_bucket_public_status(bucket_name)
 
 
 
@@ -44,11 +44,12 @@ def run_audit():
 
 
     # Results logs
-    ACTIVE_AUDIT_LOG.extend([])
+    ACTIVE_AUDIT_LOG.extend([s3_results])
 
-    print("\--- Report ---")
+    #TODO: Create a detailed report
+    print("\--------- Report ---------")
     for log in ACTIVE_AUDIT_LOG:
-        print(f"[{log['status']}] {log['check']}")
+        print(f"[{log}]")
 
 if __name__ == "__main__":
     run_audit()
