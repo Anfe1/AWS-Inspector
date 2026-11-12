@@ -3,6 +3,7 @@ from botocore.exceptions import ClientError
 
 #TODO:Create an s3 inspector that can track s3 compliance.
 #TODO: Add more comments
+#TODO: Finish logging system
 
 def check_s3_bucket_public_status(bucket_name):
 
@@ -78,11 +79,11 @@ def check_s3_bucket_public_status(bucket_name):
 
         for rule in rules:
             algorithm = rule['ApplyServerSideEncryptionByDefault']['SSEAlgorithm']
-            print(f"Bucket default encryption is enabled using: {algorithm}")
 
             if 'KMSMasterKeyId' in rule['ApplyServerSideEncryptionByDefault']:
                 kms_key = rule['ApplyServerSideEncryptionByDefault']['KMSMasterKeyId']
-                print(f"KMS Key ARN: {kms_key}")
+            else:
+                kms_key = None
 
     except ClientError as e:
 
@@ -102,6 +103,16 @@ def check_s3_bucket_public_status(bucket_name):
             target_bucket = logging_status['TargetBucket']
             target_prefix = logging_status['TargetPrefix', '']
 
+        else:
+            logging_info = None
+            target_bucket = None
+            target_prefix = None
+
     except ClientError as e:
 
         print(f"[ERROR]    {bucket_name}: Could not check status ({str(e)})")
+
+    return {"s3":{"is_policy_public": is_policy_public, "is_acl_public": is_acl_public,
+            "bpa_blocks_acls": bpa_blocks_acls,"bpa_blocks_policy": bpa_blocks_policy,
+            "Bucket_algorithm": algorithm, "km_key": kms_key, "logging_info": logging_info,
+            "target_bucket": target_bucket, "target_prefix": target_prefix}}
