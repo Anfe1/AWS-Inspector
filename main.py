@@ -6,7 +6,7 @@ from src.inspectors.s3.s3_inspector import check_s3_bucket_public_status
 
 def run_audit():
 
-    print("Initiating AWS resource inspection")
+    print("\nInitiating AWS resource inspection")
 
     #TODO: Run the application logic that audits the AWS services
     #TODO: Need to reformat for better calling of inspector functions, at the moment the app only calls in s3 inspections
@@ -14,7 +14,7 @@ def run_audit():
 
     try:
         # Initialize s3 client
-        print("Initiating S3 inspection")
+        print("\nInitiating S3 inspection")
         s3_client = boto3.client("s3")
         response = s3_client.list_buckets()
         buckets = response.get('Buckets', [])
@@ -22,9 +22,6 @@ def run_audit():
         if not buckets:
             print("No buckets found.")
             return
-
-        print(f"{'Bucket Name':<45} | {'Public Block':<12} | {'Encryption':<12} | {'Versioning':<12}")
-        print("-" * 90)
 
         #TODO: Call in inspector functions
         for bucket in buckets:
