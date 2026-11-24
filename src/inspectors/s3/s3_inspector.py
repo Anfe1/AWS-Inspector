@@ -91,9 +91,12 @@ def check_s3_bucket_bpa_configuration(s3_client, bucket_name: str) -> dict:
     except ClientError as e:
 
         if e.response['Error']['Code'] == 'NoSuchPublicAccessBlock':
-            pass
+            return {
+                "check": "BPA Configuration",
+                "detail": e.response['Error']['Code']
+            }
         else:
-            print(f'Error checking BPA: {e}')
+            return f'Error checking BPA: {e}'
 
 def check_s3_bucket_encryption(s3_client, bucket_name: str) -> dict:
 
@@ -137,6 +140,7 @@ def check_s3_bucket_logging(s3_client, bucket_name: str) -> dict:
             logging_info = None
             target_bucket = None
             target_prefix = None
+
 
     except ClientError as e:
 
