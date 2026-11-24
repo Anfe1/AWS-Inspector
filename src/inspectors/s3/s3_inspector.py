@@ -53,11 +53,16 @@ def check_s3_bucket_acl(s3_client, bucket_name: str) -> dict:
                 'http://amazonaws.com'
             ]:
                 is_acl_public = True
+
                 return {"check": "Bucket ACLs",
                         "is_public": is_acl_public,
                         "details": "Bucket has ALCs enabled." if is_acl_public else "Bucket has ACLs disabled."}
 
     except ClientError as e:
+
+        return {"check": "public_status",
+                "details": print(f"Error Bucket ACL: {e}")}
+
         print(f"Error checking ACL: {e}")
 
 def check_s3_bucket_bpa_configuration(s3_client, bucket_name: str) -> dict:
@@ -74,6 +79,14 @@ def check_s3_bucket_bpa_configuration(s3_client, bucket_name: str) -> dict:
 
         bpa_blocks_acls = config.get('IgnorePublicAcls', False) or config.get('BlockPublicAcls', False)
         bpa_blocks_policy = config.get('RestrictPublicBuckets', False) or config.get('BlockPublicPolicy', False)
+
+        return ({"check": "BPA Configuration",
+                "is_public": bpa_blocks_acls,
+                "details": "Bucket has public block acls enabled." if bpa_blocks_acls else "Bucket has public block acls disabled."},{
+                "check": "BPA Configuration",
+                "is_public": bpa_blocks_policy,
+                "details": "Bucket has public block policy enabled." if bpa_blocks_policy else "Bucket has public block policy disabled."
+        })
 
     except ClientError as e:
 
