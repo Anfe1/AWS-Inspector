@@ -16,24 +16,20 @@ def check_s3_bucket_public_status(s3_client, bucket_name: str) -> dict:
         is_policy_public = policy_status.get('PolicyStatus', {}).get('IsPublic', False)
 
         return {"check": "public_status",
-                "is_public": is_policy_public,
+                "is_policy_public": is_policy_public,
                 "details": "Bucket is public" if is_policy_public else "Bucket is private"}
 
     # Error handling for policy
     except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchBucketPolicy':
-            is_policy_public = False
 
             return {"check": "public_status",
-                    "is_public": is_policy_public,
-                    "details": "No bucket policy found."}
+                    "details": f"No bucket policy found. Error: {e.response['Error']['Code']} "}
 
         else:
-            is_policy_public = None
 
             return {"check": "public_status",
-                    "is_public": is_policy_public,
-                    "details": print(f"Error checking policy status: {e}")}
+                    "details": f"An error occurred: {e}"}
 
 def check_s3_bucket_acl(s3_client, bucket_name: str) -> dict:
 
@@ -55,15 +51,14 @@ def check_s3_bucket_acl(s3_client, bucket_name: str) -> dict:
                 is_acl_public = True
 
                 return {"check": "Bucket ACLs",
-                        "is_public": is_acl_public,
+                        "is_acl_public": is_acl_public,
                         "details": "Bucket has ALCs enabled." if is_acl_public else "Bucket has ACLs disabled."}
 
     except ClientError as e:
 
         return {"check": "public_status",
-                "details": print(f"Error Bucket ACL: {e}")}
+                "details": f"An error occurred: {e}"}
 
-        print(f"Error checking ACL: {e}")
 
 def check_s3_bucket_bpa_configuration(s3_client, bucket_name: str) -> dict:
 
@@ -80,23 +75,23 @@ def check_s3_bucket_bpa_configuration(s3_client, bucket_name: str) -> dict:
         bpa_blocks_acls = config.get('IgnorePublicAcls', False) or config.get('BlockPublicAcls', False)
         bpa_blocks_policy = config.get('RestrictPublicBuckets', False) or config.get('BlockPublicPolicy', False)
 
-        return ({"check": "BPA Configuration",
-                "is_public": bpa_blocks_acls,
-                "details": "Bucket has public block acls enabled." if bpa_blocks_acls else "Bucket has public block acls disabled."},{
-                "check": "BPA Configuration",
-                "is_public": bpa_blocks_policy,
-                "details": "Bucket has public block policy enabled." if bpa_blocks_policy else "Bucket has public block policy disabled."
-        })
+        return {"check": "BPA Configuration",
+                "has_Block_acls": bpa_blocks_acls,
+                 "has_block_policy": bpa_blocks_policy,
+                "details":{"Bucket has public block acls enabled." if bpa_blocks_acls else "Bucket has public block acls disabled.",
+                "Bucket has public block policy." if bpa_blocks_policy else "Bucket has public block policy."}}
 
     except ClientError as e:
 
         if e.response['Error']['Code'] == 'NoSuchPublicAccessBlock':
+
             return {
                 "check": "BPA Configuration",
-                "detail": e.response['Error']['Code']
+                "detail": f"No Public Access Block found. Error: {e.response['Error']['Code']}"
             }
         else:
-            return f'Error checking BPA: {e}'
+            return {"check": "BPA Configuration",
+                    "details": f"An error occurred: {e}"}
 
 def check_s3_bucket_encryption(s3_client, bucket_name: str) -> dict:
 
@@ -116,12 +111,26 @@ def check_s3_bucket_encryption(s3_client, bucket_name: str) -> dict:
             else:
                 kms_key = None
 
+        return {"check": "Bucket Encryption",
+                "has_algorithm": algorithm,
+                "has_kms": kms_key,
+                "details": "Bucket algorith and KMS."}
+
     except ClientError as e:
 
         if e.response['Error']['Code'] == 'ServerSideEncryptionConfigurationNotFoundError':
-            print("No explicit default encryption configuration found. S3 falls back to automatic SSE-S3.")
+
+            return {
+                "check": "Bucket Encryption",
+                "details": f"No explicit default encryption configuration found. S3 falls back to automatic SSE-S3. Error: {e.response['Error']['Code']}"
+            }
+
         else:
-            print(f"An error occurred: {e}")
+            return {
+                "check": "Bucket Encryption",
+                "details": f"An error occurred: {e}"
+            }
+
 
 def check_s3_bucket_logging(s3_client, bucket_name: str) -> dict:
 
@@ -141,8 +150,16 @@ def check_s3_bucket_logging(s3_client, bucket_name: str) -> dict:
             target_bucket = None
             target_prefix = None
 
+            return {
+                "check": "Bucket Logging",
+                "is_logging_enabled": {"logging_info": logging_info, "target_bucket": target_bucket, "target_prefix": target_prefix},
+                "details": "Bucket Logging enabled." if 'LoggingEnabled' in logging_status else "Bucket Logging disabled."
+            }
 
     except ClientError as e:
 
-        print(f"[ERROR]    {bucket_name}: Could not check status ({str(e)})")
+        return {"check": "Bucket Logging",
+                "details": f"An error occurred: {e}"
+                }
+
 
